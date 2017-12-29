@@ -51,7 +51,6 @@ def audit_m2m_change(sender, **kwargs):
 
 
 def audit_post_save(sender, **kwargs):
-    print('54')
     if kwargs['created'] and not kwargs.get('raw', False):
         save_audit(kwargs['instance'], Audit.ADD)
 
@@ -77,7 +76,6 @@ def register(*my_models):
     if not settings.DJANGO_SIMPLE_AUDIT_ACTIVATED:
         return False
     global MODEL_LIST
-    print(80, 'register')
     for model in my_models:
         if model is not None:
             if model not in MODEL_LIST:
@@ -266,9 +264,7 @@ def save_audit(instance, operation, kwargs={}):
                     change.new_value = handle_unicode(new_value)
                     change.old_value = handle_unicode(old_value)
                     change.save()
-            print(269, change)
     except:
-        print(270, 'exception', repr(instance), type(instance), getattr(instance, '__dict__', None))
         import traceback
         traceback.print_exc()
         LOG.error(u'Error registering auditing to %s: (%s) %s',
