@@ -51,6 +51,7 @@ def audit_m2m_change(sender, **kwargs):
 
 
 def audit_post_save(sender, **kwargs):
+    print('54')
     if kwargs['created'] and not kwargs.get('raw', False):
         save_audit(kwargs['instance'], Audit.ADD)
 
@@ -76,6 +77,7 @@ def register(*my_models):
     if not settings.DJANGO_SIMPLE_AUDIT_ACTIVATED:
         return False
     global MODEL_LIST
+    print(80, 'register')
     for model in my_models:
         if model is not None:
             if model not in MODEL_LIST:
@@ -114,11 +116,11 @@ def get_value(obj, attr):
     """
     if hasattr(obj, attr):
         try:
-            return getattr(obj, attr).__unicode__()
+            return getattr(obj, attr).__str__()
         except:
             value = getattr(obj, attr)
             if hasattr(value, 'all'):
-                return [v.__unicode__() for v in value.all()]
+                return [v.__str__() for v in value.all()]
             else:
                 return value
     else:
@@ -144,7 +146,7 @@ def to_dict(obj):
 
 def dict_diff(old, new):
 
-    keys = set(old.keys() + new.keys())
+    keys = set(list(old.keys()) + list(new.keys()))
     diff = {}
     for key in keys:
         old_value = old.get(key, None)
@@ -164,9 +166,9 @@ def dict_diff(old, new):
 
 
 def format_value(v):
-    if isinstance(v, basestring):
+    if isinstance(v, str):
         return u"'%s'" % v
-    return unicode(v)
+    return str(v)
 
 
 def save_audit(instance, operation, kwargs={}):
@@ -236,9 +238,9 @@ def save_audit(instance, operation, kwargs={}):
                         format_value(v[1]),
                     ) for k, v in changed_fields.items()])
         elif operation == Audit.DELETE:
-            description = _('Deleted %s') % unicode(instance)
+            description = _('Deleted %s') % str(instance)
         elif operation == Audit.ADD:
-            description = _('Added %s') % unicode(instance)
+            description = _('Added %s') % str(instance)
 
         LOG.debug("called audit with operation=%s instance=%s persist=%s" % (operation, instance, persist_audit))
         if persist_audit:
@@ -264,12 +266,16 @@ def save_audit(instance, operation, kwargs={}):
                     change.new_value = handle_unicode(new_value)
                     change.old_value = handle_unicode(old_value)
                     change.save()
+            print(269, change)
     except:
+        print(270, 'exception', repr(instance), type(instance), getattr(instance, '__dict__', None))
+        import traceback
+        traceback.print_exc()
         LOG.error(u'Error registering auditing to %s: (%s) %s',
             repr(instance), type(instance), getattr(instance, '__dict__', None), exc_info=True)
 
 
 def handle_unicode(s):
-    if isinstance(s, basestring):
+    if isinstance(s, str):
         return s.encode('utf-8')
     return s

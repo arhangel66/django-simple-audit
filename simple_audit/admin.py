@@ -4,7 +4,7 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import escape
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import redirect
 from django.conf.urls import url
 from .models import Audit

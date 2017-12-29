@@ -39,10 +39,10 @@ class Audit(models.Model):
     )
     date = models.DateTimeField(auto_now_add=True, verbose_name=_("Date"))
     operation = models.PositiveIntegerField(choices=OPERATION_CHOICES, verbose_name=_('Operation'))
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
-    audit_request = models.ForeignKey("AuditRequest", null=True)
+    audit_request = models.ForeignKey("AuditRequest", null=True, on_delete=models.CASCADE)
     description = models.TextField()
     obj_description = models.CharField(max_length=100, db_index=True, null=True, blank=True)
 
@@ -64,7 +64,7 @@ class Audit(models.Model):
         audit.operation = Audit.CHANGE if operation is None else operation
         audit.content_object = audit_obj
         audit.description = description
-        audit.obj_description = (audit_obj and unicode(audit_obj) and '')[:100]
+        audit.obj_description = (audit_obj and str(audit_obj) and '')[:100]
         audit.audit_request = AuditRequest.current_request(True)
         audit.save()
         return audit
@@ -74,7 +74,7 @@ class Audit(models.Model):
 
 
 class AuditChange(models.Model):
-    audit = models.ForeignKey(Audit, related_name='field_changes')
+    audit = models.ForeignKey(Audit, related_name='field_changes', on_delete=models.CASCADE)
     field = models.CharField(max_length=255)
     old_value = models.TextField(null=True, blank=True)
     new_value = models.TextField(null=True, blank=True)
@@ -94,7 +94,7 @@ class AuditRequest(models.Model):
     ip = models.GenericIPAddressField()
     path = models.CharField(max_length=1024)
     date = models.DateTimeField(auto_now_add=True, verbose_name=_("Date"))
-    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'))
+    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'audit_request'

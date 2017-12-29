@@ -1,8 +1,10 @@
 # threadlocals middleware
 from .models import AuditRequest
 from . import settings
+from django.utils.deprecation import MiddlewareMixin
 
-class TrackingRequestOnThreadLocalMiddleware(object):
+
+class TrackingRequestOnThreadLocalMiddleware(MiddlewareMixin):
     """Middleware that gets various objects from the
     request object and saves them in thread local storage."""
 
@@ -18,7 +20,7 @@ class TrackingRequestOnThreadLocalMiddleware(object):
         return ip
 
     def process_request(self, request):
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             ip = self._get_ip(request)
             AuditRequest.new_request(request.get_full_path(), request.user, ip)
         else:
